@@ -231,6 +231,7 @@ void cGame::update(double theDeltaTime)
 		theTanks.update(theDeltaTime);
 		thePlayer.update(theDeltaTime, "leftRight");
 		theShells.update(theDeltaTime);
+		std::cout << theTanks.theNumActiveTanks();
 		for (int atank = 0; atank < theTanks.theNumTanks(); atank++)
 		{
 			for (int aShell = 0; aShell < theShells.theNumShells(); aShell++)
