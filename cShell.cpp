@@ -42,7 +42,7 @@ void cShell::update(double ShellDeltaTime)
 	this->setSpritePos({ currentSpritePos.x , currentSpritePos.y });
 	this->setBoundingRect();
 	// The line below is for debugging purposes and can be safely removed.
-	std::cout << "Shell: " << currentSpritePos.x << "," << currentSpritePos.y << " Rot " << this->getSpriteRotAngle() << " DT " << ShellDeltaTime << "\n";
+	//std::cout << "Shell: " << currentSpritePos.x << "," << currentSpritePos.y << " Rot " << this->getSpriteRotAngle() << " DT " << ShellDeltaTime << "\n";
 }
 /*
 =================================================================

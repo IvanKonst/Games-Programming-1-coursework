@@ -30,7 +30,7 @@ using namespace std::chrono;
 using namespace std;
 
 //Define the string to appear in the top left corner of the window
-constexpr auto WINDOW_TITLE = "Name of My Game";
+constexpr auto WINDOW_TITLE = "Cosmic Rebellion";
 constexpr auto WINDOW_WIDTH = 1024;
 constexpr auto WINDOW_HEIGHT = 768;
 

@@ -54,7 +54,7 @@ void cTank::update(double tankDeltaTime)
 		this->setSpritePos({ currentSpritePos.x , currentSpritePos.y });
 		this->setBoundingRect();
 		// The line below is for debugging purposes and can be safely removed.
-		std::cout << currentSpritePos.x << "," << currentSpritePos.y << " Rot " << this->getTankRotation() << " DT " << tankDeltaTime << "\n";
+		//std::cout << currentSpritePos.x << "," << currentSpritePos.y << " Rot " << this->getTankRotation() << " DT " << tankDeltaTime << "\n";
 	}
 }
 
@@ -76,7 +76,6 @@ void cTank::update(double tankDeltaTime, std::string direction)
 	this->setSpritePos({ currentSpritePos.x , currentSpritePos.y });
 	this->setBoundingRect();
 	// The line below is for debugging purposes and can be safely removed.
-	std::cout << currentSpritePos.x << "," << currentSpritePos.y << " Rot " << this->getTankRotation() << " DT " << tankDeltaTime << "\n";
 
 }
 

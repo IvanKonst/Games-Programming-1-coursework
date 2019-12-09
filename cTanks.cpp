@@ -9,7 +9,7 @@ void cTanks::add(cTextureMgr* theTxtMgr, std::vector<LPCSTR> txtName, SDL_Point 
 	this->theTanks.push_back(new cTank(posXY, fruitRot, fruitVel));
 	LPCSTR textName = txtName[static_cast<int>(this->theTanks[loopPos]->getETankType()) + 3];
 	this->theTanks[loopPos]->setTexture(theTxtMgr->getTexture(textName));
-	this->theTanks[loopPos]->setSpriteDimensions(theTxtMgr->getTexture(textName)->getTWidth(), theTxtMgr->getTexture(textName)->getTHeight());
+	this->theTanks[loopPos]->setSpriteDimensions(theTxtMgr->getTexture(textName)->getTWidth()*2, theTxtMgr->getTexture(textName)->getTHeight()*2);
 	this->theTanks[loopPos]->setTankVelocity(100);
 	this->theTanks[loopPos]->setActive(true);
 }

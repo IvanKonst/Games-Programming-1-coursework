@@ -50,8 +50,10 @@ void cGame::initialise(SDL_Renderer* theRenderer)
 	theSoundMgr->initMixer();	
 
 	// Store the textures
-	textureName = { "theBackground","player","shell", "blue", "brown", "turq", "green", "openingScreen", "endScreen"};
-	texturesToUse = { "Images/Bkg/Bkg.png","Images/Sprites/TankGreen.png", "Images/Sprites/Shell.png","Images/Sprites/TankBlueR.png","Images/Sprites/TankBrownR.png","Images/Sprites/TankTurqR.png","Images/Sprites/TankGreenR.png", "Images/Bkg/openingScreenTanks.png", "Images/Bkg/endScreenTanks.png" };
+	textureName = { "theBackground","player","shell", "blue", "brown", "turq", "green", "openingScreen", "endScreen","instructionsScreen"};
+	texturesToUse = { "Images/Bkg/Spacec.png","Images/Sprites/Player.png", "Images/Sprites/Firea.png",
+		"Images/Sprites/Spaceship1.png","Images/Sprites/Spaceship1.png","Images/Sprites/Spaceship1.png",
+		"Images/Sprites/Spaceship1.png", "Images/Bkg/Spaceb.png", "Images/Bkg/Spaceb.png","Images/Bkg/Spaceb.png"  };
 	for (unsigned int tCount = 0; tCount < textureName.size(); tCount++)
 	{	
 		theTextureMgr->addTexture(textureName[tCount], texturesToUse[tCount]);
@@ -59,7 +61,7 @@ void cGame::initialise(SDL_Renderer* theRenderer)
 	aColour = { 228, 213, 238, 255 };
 	// Create textures for Game Dialogue (text)
 	fontList = { "rocket", "digital" };
-	fontsToUse = { "Fonts/RocketRinder-yV5d.ttf", "Fonts/digital-7.ttf" };
+	fontsToUse = { "Fonts/BlackPearl.ttf", "Fonts/BlackPearl.ttf" };
 	for (unsigned int fonts = 0; fonts < fontList.size(); fonts++)
 	{
 		if (fonts == 0)
@@ -72,23 +74,25 @@ void cGame::initialise(SDL_Renderer* theRenderer)
 		}
 	}
 	// Create text Textures
-	gameTextNames = { "TitleTxt", "score"};
-	gameTextList = { "Tank Battle", "Tanks Destroyed: "};
+	gameTextNames = { "TitleTxt", "score", "GameOver","Title", "instructions","goal","instructions2", "score2"};
+	gameTextList = { "Cosmic Rebellion", "Score: ", "Game Over","Cosmic Rebellion","Use W A S D - to move","Goal: Kill all the ships","Space - to shoot","Score: "};
 	for (unsigned int text = 0; text < gameTextNames.size(); text++)
 	{
 		if (text == 0 )
 		{
-			theTextureMgr->addTexture(gameTextNames[text], theFontMgr->getFont("rocket")->createTextTexture(theRenderer, gameTextList[text], textType::solid, { 44, 203, 112, 255 }, { 0, 0, 0, 0 }));
+			theTextureMgr->addTexture(gameTextNames[text], theFontMgr->getFont("rocket")->createTextTexture(theRenderer, gameTextList[text],textType::solid,
+				{ 255, 255, 0, 255 }, { 0, 0, 0, 0 }));
 		}
 		else
 		{
-			theTextureMgr->addTexture(gameTextNames[text], theFontMgr->getFont("digital")->createTextTexture(theRenderer, gameTextList[text], textType::solid, { 44, 203, 112, 255 }, { 0, 0, 0, 0 }));
+			theTextureMgr->addTexture(gameTextNames[text], theFontMgr->getFont("digital")->createTextTexture(theRenderer, gameTextList[text],textType::solid,
+				{ 255, 255, 0, 255 }, { 0, 0, 0, 0 }));
 		}
 	}
 	// Load game sounds
-	soundList = { "theme", "click" };
-	soundTypes = { soundType::music, soundType::sfx};
-	soundsToUse = { "Audio/Theme/Kevin_MacLeod_-_Monkeys_Spinning_Monkeys.mp3", "Audio/SFX/ClickOn.wav"};
+	soundList = { "theme", "click", "fire" };
+	soundTypes = { soundType::music, soundType::sfx, soundType::sfx };
+	soundsToUse = { "Audio/Theme/GameMusic.mp3", "Audio/SFX/ClickOn.wav", "Audio/SFX/Laser.mp3"};
 	for (unsigned int sounds = 0; sounds < soundList.size(); sounds++)
 	{
 		theSoundMgr->add(soundList[sounds], soundsToUse[sounds], soundTypes[sounds]);
@@ -117,17 +121,19 @@ void cGame::initialise(SDL_Renderer* theRenderer)
 	spriteBkgd.setTexture(theTextureMgr->getTexture("theBackground"));
 	spriteBkgd.setSpriteDimensions(theTextureMgr->getTexture("theBackground")->getTWidth(), theTextureMgr->getTexture("theBackground")->getTHeight());
 
-	thePlayer.setSpritePos({ 500,600 });
+	thePlayer.setSpritePos({ 400,600 });
 	thePlayer.setTexture(theTextureMgr->getTexture("player"));
 	thePlayer.setSpriteDimensions(theTextureMgr->getTexture("player")->getTWidth(), theTextureMgr->getTexture("player")->getTHeight());
 
 	for (int atank = 0; atank < 6; atank++)
 	{
-		theTanks.add(theTextureMgr, textureName, { (150 * atank) + 75,0 }, 0.0f, 100, atank);
+		theTanks.add(theTextureMgr, textureName, { (150 * atank) + 75,40 }, 0.0f, 100, atank);
 	}
 
 	strScore = gameTextList[1];
 	strScore += to_string(tanksDestroyed).c_str();
+	//EndScore = strScore;
+
 }
 
 void cGame::run(SDL_Renderer* theRenderer)
@@ -160,12 +166,56 @@ void cGame::render(SDL_Renderer* theRenderer)
 		spriteBkgd.setSpriteDimensions(theTextureMgr->getTexture("openingScreen")->getTWidth(), theTextureMgr->getTexture("openingScreen")->getTHeight());
 		spriteBkgd.render(theRenderer, NULL, NULL, spriteBkgd.getSpriteRotAngle(), &spriteBkgd.getSpriteCentre());
 
+		// Title text 
+		tempTextTexture = theTextureMgr->getTexture("Title");
+		theTextureRectangle = tempTextTexture->getTextureRect();
+		pos = { 170, 100, theTextureRectangle.w*2, theTextureRectangle.h*2 };
+		tempTextTexture->renderTexture(theRenderer, tempTextTexture->getTexture(), &theTextureRectangle, &pos);
+
 		// Render Button
-		theButtonMgr->getBtn("play_btn")->render(theRenderer, &theButtonMgr->getBtn("play_btn")->getSpriteDimensions(), &theButtonMgr->getBtn("play_btn")->getSpritePos(), theButtonMgr->getBtn("play_btn")->getSpriteRotAngle(), &theButtonMgr->getBtn("play_btn")->getSpriteCentre());
-		theButtonMgr->getBtn("exit_btn")->setSpritePos({ 400, 375 });
-		theButtonMgr->getBtn("exit_btn")->render(theRenderer, &theButtonMgr->getBtn("exit_btn")->getSpriteDimensions(), &theButtonMgr->getBtn("exit_btn")->getSpritePos(), theButtonMgr->getBtn("exit_btn")->getSpriteRotAngle(), &theButtonMgr->getBtn("exit_btn")->getSpriteCentre());
+		theButtonMgr->getBtn("play_btn")->render(theRenderer, &theButtonMgr->getBtn("play_btn")->getSpriteDimensions(),
+			&theButtonMgr->getBtn("play_btn")->getSpritePos(), theButtonMgr->getBtn("play_btn")->getSpriteRotAngle(), &theButtonMgr->getBtn("play_btn")->getSpriteCentre());
+		theButtonMgr->getBtn("instructions_btn")->render(theRenderer, &theButtonMgr->getBtn("instructions_btn")->getSpriteDimensions(),
+			&theButtonMgr->getBtn("instructions_btn")->getSpritePos(), theButtonMgr->getBtn("instructions_btn")->getSpriteRotAngle(),
+			&theButtonMgr->getBtn("instructions_btn")->getSpriteCentre());
+		theButtonMgr->getBtn("play_btn")->setSpriteDimensions(102, 50);
+		theButtonMgr->getBtn("play_btn")->setSpritePos({ 450, 300 });
+		theButtonMgr->getBtn("instructions_btn")->setSpriteDimensions(200, 50);
+		theButtonMgr->getBtn("instructions_btn")->setSpritePos({ 400, 370 });
+		theButtonMgr->getBtn("exit_btn")->setSpriteDimensions(102, 50);
+		theButtonMgr->getBtn("exit_btn")->setSpritePos({ 450, 440 });
+		theButtonMgr->getBtn("exit_btn")->render(theRenderer, &theButtonMgr->getBtn("exit_btn")->getSpriteDimensions(),
+			&theButtonMgr->getBtn("exit_btn")->getSpritePos(), theButtonMgr->getBtn("exit_btn")->getSpriteRotAngle(), &theButtonMgr->getBtn("exit_btn")->getSpriteCentre());
 	}
 	break;
+	case gameState::instructions:
+	{
+		spriteBkgd.setTexture(theTextureMgr->getTexture("instructionsScreen"));
+		spriteBkgd.setSpriteDimensions(theTextureMgr->getTexture("instructionsScreen")->getTWidth(), theTextureMgr->getTexture("instructionsScreen")->getTHeight());
+		spriteBkgd.render(theRenderer, NULL, NULL, spriteBkgd.getSpriteRotAngle(), &spriteBkgd.getSpriteCentre());
+
+		//Instructions
+		tempTextTexture = theTextureMgr->getTexture("instructions");
+		theTextureRectangle = tempTextTexture->getTextureRect();
+		pos = { 170, 200, theTextureRectangle.w , theTextureRectangle.h };
+		tempTextTexture->renderTexture(theRenderer, tempTextTexture->getTexture(), &theTextureRectangle, &pos);
+		//Instructions Second Line
+		tempTextTexture = theTextureMgr->getTexture("instructions2");
+		theTextureRectangle = tempTextTexture->getTextureRect();
+		pos = { 170, 250, theTextureRectangle.w , theTextureRectangle.h };
+		tempTextTexture->renderTexture(theRenderer, tempTextTexture->getTexture(), &theTextureRectangle, &pos);
+		//Instructions Third Line
+		tempTextTexture = theTextureMgr->getTexture("goal");
+		theTextureRectangle = tempTextTexture->getTextureRect();
+		pos = { 170, 300, theTextureRectangle.w , theTextureRectangle.h };
+		tempTextTexture->renderTexture(theRenderer, tempTextTexture->getTexture(), &theTextureRectangle, &pos);
+
+		theButtonMgr->getBtn("menu_btn")->setSpritePos({ 450, 400 });
+		//theButtonMgr->getBtn("menu_btn")->setSpritePos({ 500, 500 });
+		theButtonMgr->getBtn("menu_btn")->render(theRenderer, &theButtonMgr->getBtn("menu_btn")->getSpriteDimensions(),
+			&theButtonMgr->getBtn("menu_btn")->getSpritePos(), theButtonMgr->getBtn("menu_btn")->getSpriteRotAngle(), &theButtonMgr->getBtn("menu_btn")->getSpriteCentre());
+		break;
+	}
 	case gameState::playing:
 	{
 		spriteBkgd.setTexture(theTextureMgr->getTexture("theBackground"));
@@ -178,7 +228,7 @@ void cGame::render(SDL_Renderer* theRenderer)
 		tempTextTexture->renderTexture(theRenderer, tempTextTexture->getTexture(), &theTextureRectangle, &pos);
 
 		tempTextTexture->renderTexture(theRenderer, tempTextTexture->getTexture(), &tempTextTexture->getTextureRect(), &pos);
-		theTextureMgr->addTexture("score", theFontMgr->getFont("digital")->createTextTexture(theRenderer, strScore.c_str(), textType::solid, { 44, 203, 112, 255 }, { 0, 0, 0, 0 }));
+		theTextureMgr->addTexture("score", theFontMgr->getFont("digital")->createTextTexture(theRenderer, strScore.c_str(), textType::solid, { 255, 255, 0, 255 }, { 0, 0, 0, 0 }));
 		tempTextTexture = theTextureMgr->getTexture("score");
 		pos = { 600, 10, tempTextTexture->getTextureRect().w, tempTextTexture->getTextureRect().h };
 		tempTextTexture->renderTexture(theRenderer, tempTextTexture->getTexture(), &tempTextTexture->getTextureRect(), &pos);
@@ -194,10 +244,29 @@ void cGame::render(SDL_Renderer* theRenderer)
 		spriteBkgd.setSpriteDimensions(theTextureMgr->getTexture("endScreen")->getTWidth(), theTextureMgr->getTexture("endScreen")->getTHeight());
 		spriteBkgd.render(theRenderer, NULL, NULL, spriteBkgd.getSpriteRotAngle(), &spriteBkgd.getSpriteCentre());
 
-		theButtonMgr->getBtn("menu_btn")->setSpritePos({ 500, 500 });
-		theButtonMgr->getBtn("menu_btn")->render(theRenderer, &theButtonMgr->getBtn("menu_btn")->getSpriteDimensions(), &theButtonMgr->getBtn("menu_btn")->getSpritePos(), theButtonMgr->getBtn("menu_btn")->getSpriteRotAngle(), &theButtonMgr->getBtn("menu_btn")->getSpriteCentre());
-		theButtonMgr->getBtn("exit_btn")->setSpritePos({ 500, 575 });
-		theButtonMgr->getBtn("exit_btn")->render(theRenderer, &theButtonMgr->getBtn("exit_btn")->getSpriteDimensions(), &theButtonMgr->getBtn("exit_btn")->getSpritePos(), theButtonMgr->getBtn("exit_btn")->getSpriteRotAngle(), &theButtonMgr->getBtn("exit_btn")->getSpriteCentre());
+		tempTextTexture = theTextureMgr->getTexture("GameOver");
+		theTextureRectangle = tempTextTexture->getTextureRect();
+		pos = { 290, 200, theTextureRectangle.w*2, theTextureRectangle.h*2 };
+		tempTextTexture->renderTexture(theRenderer, tempTextTexture->getTexture(), &theTextureRectangle, &pos);
+
+		tempTextTexture->renderTexture(theRenderer, tempTextTexture->getTexture(), &tempTextTexture->getTextureRect(), &pos);
+		theTextureMgr->addTexture("score2", theFontMgr->getFont("digital")->createTextTexture(theRenderer, strScore.c_str(), textType::solid, { 255, 255, 0, 255 }, { 0, 0, 0, 0 }));
+		tempTextTexture = theTextureMgr->getTexture("score2");
+		pos = { 290, 280, tempTextTexture->getTextureRect().w, tempTextTexture->getTextureRect().h };
+		tempTextTexture->renderTexture(theRenderer, tempTextTexture->getTexture(), &tempTextTexture->getTextureRect(), &pos);
+
+
+
+		//theButtonMgr->getBtn("menu_btn")->setSpriteDimensions(102, 50);
+		theButtonMgr->getBtn("menu_btn")->setSpritePos({ 450, 330 });
+		//theButtonMgr->getBtn("menu_btn")->setSpritePos({ 500, 500 });
+		theButtonMgr->getBtn("menu_btn")->render(theRenderer, &theButtonMgr->getBtn("menu_btn")->getSpriteDimensions(),
+			&theButtonMgr->getBtn("menu_btn")->getSpritePos(), theButtonMgr->getBtn("menu_btn")->getSpriteRotAngle(), &theButtonMgr->getBtn("menu_btn")->getSpriteCentre());
+
+		theButtonMgr->getBtn("exit_btn")->setSpriteDimensions(102, 50);
+		theButtonMgr->getBtn("exit_btn")->setSpritePos({ 450, 440 });
+		theButtonMgr->getBtn("exit_btn")->render(theRenderer, &theButtonMgr->getBtn("exit_btn")->getSpriteDimensions(),
+			&theButtonMgr->getBtn("exit_btn")->getSpritePos(), theButtonMgr->getBtn("exit_btn")->getSpriteRotAngle(), &theButtonMgr->getBtn("exit_btn")->getSpriteCentre());
 	}
 	break;
 	case gameState::quit:
@@ -224,14 +293,15 @@ void cGame::update(double theDeltaTime)
 	{
 		theGameState = theButtonMgr->getBtn("exit_btn")->update(theGameState, gameState::quit, theAreaClicked);
 		theGameState = theButtonMgr->getBtn("play_btn")->update(theGameState, gameState::playing, theAreaClicked);
+		theGameState = theButtonMgr->getBtn("instructions_btn")->update(theGameState, gameState::instructions, theAreaClicked);
 	}
 	break;
 	case gameState::playing:
 	{
 		theTanks.update(theDeltaTime);
-		thePlayer.update(theDeltaTime, "leftRight");
+		//thePlayer.update(theDeltaTime, "leftRight");
 		theShells.update(theDeltaTime);
-		std::cout << theTanks.theNumActiveTanks();
+		theTanks.theNumActiveTanks();
 		for (int atank = 0; atank < theTanks.theNumTanks(); atank++)
 		{
 			for (int aShell = 0; aShell < theShells.theNumShells(); aShell++)
@@ -241,6 +311,7 @@ void cGame::update(double theDeltaTime)
 			}
 		}
 		
+
 		if (tanksDestroyed < theTanks.getTanksDestroyed())
 		{
 			//Create Updated score
@@ -249,7 +320,7 @@ void cGame::update(double theDeltaTime)
 			strScore += to_string(tanksDestroyed).c_str();
 			theTextureMgr->deleteTexture("score");
 		}
-		if (theTanks.theNumActiveTanks() == 0)
+		if (theTanks.theNumActiveTanks() == 0 || tanksDestroyed == 6)
 		{
 			//End game
 			gameOver = true;
@@ -259,12 +330,20 @@ void cGame::update(double theDeltaTime)
 		{
 			theGameState = gameState::end;
 		}
+		
 	}
 	break;
 	case gameState::end:
 	{
 		theGameState = theButtonMgr->getBtn("menu_btn")->update(theGameState, gameState::menu, theAreaClicked);
 		theGameState = theButtonMgr->getBtn("exit_btn")->update(theGameState, gameState::quit, theAreaClicked);
+
+	}
+	break;
+	case gameState::instructions:
+	{
+		theGameState = theButtonMgr->getBtn("menu_btn")->update(theGameState, gameState::menu, theAreaClicked);
+		
 	}
 	break;
 	case gameState::quit:
@@ -296,7 +375,9 @@ bool cGame::getInput(bool theLoop)
 				{
 				case SDL_BUTTON_LEFT:
 				{
+					//theSoundMgr->getSnd("click")->play(0);				
 					theAreaClicked = { event.motion.x, event.motion.y };
+					
 				}
 				break;
 				case SDL_BUTTON_RIGHT:
@@ -337,13 +418,15 @@ bool cGame::getInput(bool theLoop)
 
 				case SDLK_RIGHT:
 				{
-					thePlayer.setTankVelocity(100);
+					
+					//thePlayer.setTankVelocity(100);
 				}
 				break;
 
 				case SDLK_LEFT:
 				{
-					thePlayer.setTankVelocity(-100);
+					
+					//thePlayer.setTankVelocity(-100);
 				}
 				break;
 				case SDLK_UP:
@@ -353,24 +436,24 @@ bool cGame::getInput(bool theLoop)
 				break;
 				case SDLK_d:
 				{
-					
+					thePlayer.setSpritePos({ thePlayer.getSpritePos().x + 20, thePlayer.getSpritePos().y });
 				}
 				break;
 
 				case SDLK_a:
 				{
-					
+					thePlayer.setSpritePos({ thePlayer.getSpritePos().x - 20, thePlayer.getSpritePos().y });
 				}
 				break;
 				case SDLK_w:
 				{
-					
+					thePlayer.setSpritePos({ thePlayer.getSpritePos().x , thePlayer.getSpritePos().y - 20 });
 				}
 				break;
 
 				case SDLK_s:
 				{
-					
+					thePlayer.setSpritePos({ thePlayer.getSpritePos().x , thePlayer.getSpritePos().y + 20 });
 				}
 				break;
 
@@ -378,7 +461,9 @@ bool cGame::getInput(bool theLoop)
 				{
 					int numShells = theShells.theNumShells();
 					SDL_Point tankPos = {thePlayer.getSpritePos().x, thePlayer.getSpritePos().y };
-					theShells.add(theTextureMgr, textureName, tankPos, thePlayer.getTankRotation(), 100, numShells);
+					theSoundMgr->getSnd("fire")->play(0);
+					theShells.add(theTextureMgr, textureName, tankPos, thePlayer.getTankRotation(), 1000, numShells);
+					
 				}
 				break;
 				default:

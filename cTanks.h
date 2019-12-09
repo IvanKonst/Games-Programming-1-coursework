@@ -1,5 +1,6 @@
 #pragma once
 #include "cTank.h"
+#include "cSprite.h"
 #include <vector>
 
 class cTanks
